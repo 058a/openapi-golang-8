@@ -1,15 +1,17 @@
 package location_test
 
 import (
+	"errors"
 	app "openapi/internal/app/stock/location"
+	mock "openapi/internal/app/stock/location/internal"
 	domain "openapi/internal/domain/stock/location"
 	"openapi/internal/infra/database"
 	infra "openapi/internal/infra/repository/sqlboiler/stock/location"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 )
-
 
 func TestCreateFailNameInvalid(t *testing.T) {
 	t.Parallel()
@@ -54,7 +56,7 @@ func TestCreateFailIdNil(t *testing.T) {
 	}
 }
 
-func TestCreateSuccess(t *testing.T) {
+func TestCreate(t *testing.T) {
 	t.Parallel()
 
 	// Setup
@@ -68,7 +70,7 @@ func TestCreateSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	// Given
 	name := "test"
 	req, err := app.NewCreateRequest(name)
@@ -92,7 +94,7 @@ func TestCreateSuccess(t *testing.T) {
 		t.Errorf("%T %v, want %v", res.Id, res.Id, newId)
 	}
 
-	id, err := domain.NewId(res.Id) 
+	id, err := domain.NewId(res.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,37 +103,34 @@ func TestCreateSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if a.Name.String() != name {
 		t.Errorf("%T %v, want %v", a.Name.String(), a.Name.String(), name)
 	}
 }
 
-func TestCreateFailDbClose(t *testing.T) {
+func TestCreateFailSaveFail(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	db, err := database.Open()
-	if err != nil {
-		t.Fatal(err)
-	}
-	db.Close()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	repo, err := infra.NewRepository(db)
+	name, err := domain.NewName("test")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Given
-	name := "test"
-	req, err := app.NewCreateRequest(name)
-	if err != nil {
-		t.Fatal(err)
-	}
+	repo := mock.NewMockIRepository(ctrl)
+	repo.EXPECT().Save(gomock.Any()).Return(errors.New("test error"))
 
 	// When
-	newId := uuid.New()
-	_, err = app.Create(req, repo, newId)
+	reqCreate, err := app.NewCreateRequest(name.String())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = app.Create(reqCreate, repo, uuid.New())
 
 	// Then
 	if err == nil {

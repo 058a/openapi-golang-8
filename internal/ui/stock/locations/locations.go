@@ -17,8 +17,8 @@ type Handler struct {
 }
 
 func RegisterHandlers(e *echo.Echo, db *sql.DB) error {
-	if db == nil {
-		return fmt.Errorf("db is nil")
+	if e == nil {
+		return fmt.Errorf("echo is nil")
 	}
 	repo, err := infra.NewRepository(db)
 	if err != nil {

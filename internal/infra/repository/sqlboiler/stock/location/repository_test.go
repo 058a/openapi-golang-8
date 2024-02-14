@@ -37,7 +37,7 @@ func TestNewRepository(t *testing.T) {
 	}
 }
 
-func TestNewRepositoryFail(t *testing.T) {
+func TestNewRepositoryFailDbNil(t *testing.T) {
 	t.Parallel()
 
 	// When
@@ -46,6 +46,29 @@ func TestNewRepositoryFail(t *testing.T) {
 	// Then
 	if err != infra.ErrDbEmpty {
 		t.Errorf("%T %+v want %+v", err, err, infra.ErrDbEmpty)
+	}
+
+	if repo != nil {
+		t.Errorf("expected nil, got not nil")
+	}
+}
+
+func TestNewRepositoryFailDbClose(t *testing.T) {
+	t.Parallel()
+
+	// Given
+	db, err := database.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.Close()
+
+	// When
+	repo, err := infra.NewRepository(db)
+
+	// Then
+	if err != infra.ErrPingFail {
+		t.Errorf("%T %+v want %+v", err, err, infra.ErrPingFail)
 	}
 
 	if repo != nil {
@@ -119,7 +142,7 @@ func TestSave(t *testing.T) {
 	if beforeData.ID != id.String() {
 		t.Errorf("%T %+v want %+v", beforeData.ID, beforeData.ID, id)
 	}
-	
+
 	if beforeData.Name != name.String() {
 		t.Errorf("%T %+v want %+v", beforeData.Name, beforeData.Name, name)
 	}
@@ -147,7 +170,7 @@ func TestSave(t *testing.T) {
 	}
 
 	if afterData.Deleted != beforeData.Deleted {
-		t.Errorf("%T %+v want %+v", afterData.Deleted, afterData.Deleted, beforeData.Deleted)		
+		t.Errorf("%T %+v want %+v", afterData.Deleted, afterData.Deleted, beforeData.Deleted)
 	}
 
 	if afterData.CreatedAt != beforeData.CreatedAt {
@@ -156,6 +179,41 @@ func TestSave(t *testing.T) {
 
 	if afterData.UpdatedAt.Before(afterData.CreatedAt) == true {
 		t.Errorf("%T %+v want greater than %+v ", afterData.UpdatedAt, afterData.UpdatedAt, afterData.CreatedAt)
+	}
+}
+
+func TestSaveFailDbClose(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	db, err := database.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repo, err := infra.NewRepository(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Given
+	id, err := domain.NewId(uuid.New())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	name, err := domain.NewName("test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	a := domain.NewAggregate(id, name)
+
+	db.Close()
+
+	// When
+	if err = repo.Save(a); err == nil {
+		t.Fatal("expected not nil, got nil")
 	}
 }
 
@@ -178,7 +236,7 @@ func TestGet(t *testing.T) {
 	id, err := domain.NewId(uuid.New())
 	if err != nil {
 		t.Fatal(err)
-	}	
+	}
 
 	name, err := domain.NewName("test")
 	if err != nil {
@@ -227,6 +285,91 @@ func TestGet(t *testing.T) {
 	}
 }
 
+func TestGetFailDbClose(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	db, err := database.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repo, err := infra.NewRepository(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db.Close()
+
+	// Given
+	id, err := domain.NewId(uuid.New())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// When
+
+	_, err = repo.Get(id)
+	if err == nil {
+		t.Fatal("expected not nil, got nil")
+	}
+}
+
+func TestGetFailDataInvalid(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	db, err := database.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repo, err := infra.NewRepository(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Given
+	id, err := domain.NewId(uuid.New())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	name, err := domain.NewName("test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	a := domain.NewAggregate(id, name)
+
+	if err = repo.Save(a); err != nil {
+		t.Fatal(err)
+	}
+
+	data := &sqlboiler.StockLocation{
+		ID:      a.Id.String(),
+		Name:    "",
+		Deleted: a.IsDeleted(),
+	}
+
+	err = data.Upsert(
+		context.Background(),
+		db,
+		true,
+		[]string{"id"},
+		boil.Whitelist("name", "deleted"),
+		boil.Infer(),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// When
+	_, err = repo.Get(id)
+	if err == nil {
+		t.Fatal("expected not nil, got nil")
+	}
+}
 func TestFind(t *testing.T) {
 	t.Parallel()
 
@@ -295,7 +438,7 @@ func TestFind(t *testing.T) {
 	}
 }
 
-func TestFailDbClose(t *testing.T) {
+func TestFindFailDbClose(t *testing.T) {
 	t.Parallel()
 
 	// Setup
@@ -303,87 +446,24 @@ func TestFailDbClose(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	repo, err := infra.NewRepository(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	db.Close()
 
-	repo, err := infra.NewRepository(db)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	// Given
 	id, err := domain.NewId(uuid.New())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	name, err := domain.NewName("test")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	a := domain.NewAggregate(id, name)
-
-	// Then
-	_, err = repo.Get(a.Id)
-	if err == nil {
-		t.Errorf("expected error but returned nil")
-	}
-
-	_, err = repo.Find(a.Id)
-	if err == nil {
-		t.Errorf("expected error but returned nil")
-	}
-
-	err = repo.Save(a)
-	if err == nil {
-		t.Errorf("expected error but returned nil")
-	}
-}
-
-func TestGetFailDataInvalid(t *testing.T) {
-	t.Parallel()
-
-	// Setup
-	db, err := database.Open()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer db.Close()
-
-	repo, err := infra.NewRepository(db)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Given
-	id, err := domain.NewId(uuid.New())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	data := &sqlboiler.StockLocation{
-		ID:   id.String(),
-		Name: "",
-		Deleted: false,
-	}
-
-	err = data.Upsert(
-		context.Background(),
-		db,
-		true,
-		[]string{"id"},
-		boil.Whitelist("name","deleted"),
-		boil.Infer(),
-	)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// When
-	_, err = repo.Get(id)
 
-	// Then
+	_, err = repo.Find(id)
 	if err == nil {
-		t.Errorf("expected not nil, got nil")
+		t.Fatal("expected not nil, got nil")
 	}
 }

@@ -11,21 +11,26 @@ import (
 	"openapi/internal/domain/stock/location"
 )
 
-type(
-		Repository struct {
+type (
+	Repository struct {
 		location.IRepository
 		db *sql.DB
 	}
 )
 
-var(
-	ErrDbEmpty = errors.New("db is empty")
+var (
+	ErrDbEmpty    = errors.New("db is empty")
+	ErrPingFail   = errors.New("ping fail")
 	ErrRowDeleted = errors.New("row deleted")
 )
 
 func NewRepository(db *sql.DB) (*Repository, error) {
 	if db == nil {
 		return nil, ErrDbEmpty
+	}
+	err := db.Ping()
+	if err != nil {
+		return nil, ErrPingFail
 	}
 	return &Repository{
 		db: db,
@@ -34,8 +39,8 @@ func NewRepository(db *sql.DB) (*Repository, error) {
 
 func (r *Repository) Save(a *location.Aggregate) error {
 	data := &sqlboiler.StockLocation{
-		ID:   a.Id.String(),
-		Name: a.Name.String(),
+		ID:      a.Id.String(),
+		Name:    a.Name.String(),
 		Deleted: a.IsDeleted(),
 	}
 
@@ -44,7 +49,7 @@ func (r *Repository) Save(a *location.Aggregate) error {
 		r.db,
 		true,
 		[]string{"id"},
-		boil.Whitelist("name","deleted"),
+		boil.Whitelist("name", "deleted"),
 		boil.Infer(),
 	)
 	if err != nil {
@@ -74,7 +79,6 @@ func (r *Repository) Get(id location.Id) (*location.Aggregate, error) {
 	return a, nil
 }
 
-
 func (r *Repository) Find(id location.Id) (bool, error) {
 	data, err := sqlboiler.FindStockLocation(context.Background(), r.db, id.UUID().String())
 	if err != nil && err != sql.ErrNoRows {
@@ -86,7 +90,7 @@ func (r *Repository) Find(id location.Id) (bool, error) {
 	}
 
 	if data.Deleted {
-		return false, nil		
+		return false, nil
 	}
 
 	return true, nil
