@@ -63,25 +63,29 @@
 				
 				<option value="file3">openapi/internal/app/stock/location/update.go (100.0%)</option>
 				
-				<option value="file4">openapi/internal/domain/stock/location/aggregate.go (100.0%)</option>
+				<option value="file4">openapi/internal/domain/stock/item/entity.go (100.0%)</option>
 				
-				<option value="file5">openapi/internal/domain/stock/location/entity.go (100.0%)</option>
+				<option value="file5">openapi/internal/domain/stock/item/value.go (100.0%)</option>
 				
-				<option value="file6">openapi/internal/domain/stock/location/value.go (100.0%)</option>
+				<option value="file6">openapi/internal/domain/stock/location/aggregate.go (100.0%)</option>
 				
-				<option value="file7">openapi/internal/infra/repository/sqlboiler/stock/location/repository.go (100.0%)</option>
+				<option value="file7">openapi/internal/domain/stock/location/entity.go (100.0%)</option>
 				
-				<option value="file8">openapi/internal/ui/hello/get.go (0.0%)</option>
+				<option value="file8">openapi/internal/domain/stock/location/value.go (100.0%)</option>
 				
-				<option value="file9">openapi/internal/ui/hello/hello.go (0.0%)</option>
+				<option value="file9">openapi/internal/infra/repository/sqlboiler/stock/location/repository.go (100.0%)</option>
 				
-				<option value="file10">openapi/internal/ui/stock/locations/delete.go (72.7%)</option>
+				<option value="file10">openapi/internal/ui/hello/get.go (0.0%)</option>
 				
-				<option value="file11">openapi/internal/ui/stock/locations/locations.go (100.0%)</option>
+				<option value="file11">openapi/internal/ui/hello/hello.go (0.0%)</option>
 				
-				<option value="file12">openapi/internal/ui/stock/locations/post.go (75.0%)</option>
+				<option value="file12">openapi/internal/ui/stock/locations/delete.go (72.7%)</option>
 				
-				<option value="file13">openapi/internal/ui/stock/locations/put.go (76.5%)</option>
+				<option value="file13">openapi/internal/ui/stock/locations/locations.go (100.0%)</option>
+				
+				<option value="file14">openapi/internal/ui/stock/locations/post.go (75.0%)</option>
+				
+				<option value="file15">openapi/internal/ui/stock/locations/put.go (76.5%)</option>
 				
 				</select>
 			</div>
@@ -274,7 +278,76 @@ func Update(req updateRequest, r location.IRepository) error <span class="cov8" 
         <span class="cov8" title="1">return nil</span>
 }</pre>
 		
-		<pre class="file" id="file4" style="display: none">package location
+		<pre class="file" id="file4" style="display: none">package item
+
+import (
+        "errors"
+
+        "github.com/google/uuid"
+)
+
+type (
+        Id struct {
+                value uuid.UUID
+        }
+)
+
+var (
+        ErrInvalidId = errors.New("invalid id")
+)
+
+func NewId(v uuid.UUID) (Id, error) <span class="cov8" title="1">{
+        if v == uuid.Nil </span><span class="cov8" title="1">{
+                return Id{}, ErrInvalidId
+        }</span>
+        <span class="cov8" title="1">return Id{v}, nil</span>
+}
+
+func (v Id) UUID() uuid.UUID <span class="cov8" title="1">{
+        return v.value
+}</span>
+
+func (v Id) String() string <span class="cov8" title="1">{
+        return v.value.String()
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package item
+
+import (
+        "errors"
+)
+
+type (
+        Name struct {
+                string
+        }
+)
+
+var (
+        ErrInvalidName = errors.New("invalid name")
+)
+
+// NewName creates a new Name object.
+//
+// It takes a string parameter and returns a Name object and an error.
+func NewName(v string) (Name, error) <span class="cov8" title="1">{
+        if v == "" </span><span class="cov8" title="1">{
+                return Name{}, ErrInvalidName
+        }</span>
+        <span class="cov8" title="1">return Name{v}, nil</span>
+}
+
+// String returns the string representation of the Name type.
+//
+// No parameters.
+// Returns a string.
+func (v Name) String() string <span class="cov8" title="1">{
+        return v.string
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package location
 
 type(
         Aggregate struct {
@@ -308,7 +381,7 @@ func (a *Aggregate) Delete() <span class="cov8" title="1">{
         a.deleted = true
 }</pre>
 		
-		<pre class="file" id="file5" style="display: none">package location
+		<pre class="file" id="file7" style="display: none">package location
 
 import (
         "github.com/friendsofgo/errors"
@@ -340,7 +413,7 @@ func (v Id) String() string <span class="cov8" title="1">{
         return v.value.String()
 }</pre>
 		
-		<pre class="file" id="file6" style="display: none">package location
+		<pre class="file" id="file8" style="display: none">package location
 
 import (
         "errors"
@@ -367,7 +440,7 @@ func (v Name) String() string <span class="cov8" title="1">{
         return v.string
 }</pre>
 		
-		<pre class="file" id="file7" style="display: none">package location
+		<pre class="file" id="file9" style="display: none">package location
 
 import (
         "context"
@@ -466,7 +539,7 @@ func (r *Repository) Find(id location.Id) (bool, error) <span class="cov8" title
 }
 </pre>
 		
-		<pre class="file" id="file8" style="display: none">package hello
+		<pre class="file" id="file10" style="display: none">package hello
 
 import (
         "net/http"
@@ -486,7 +559,7 @@ func (h *Handler) GetHello(ctx echo.Context) error <span class="cov0" title="0">
 }</span>
 </pre>
 		
-		<pre class="file" id="file9" style="display: none">package hello
+		<pre class="file" id="file11" style="display: none">package hello
 
 import (
         oapicodegen "openapi/internal/infra/oapicodegen/hello"
@@ -503,7 +576,7 @@ func RegisterHandlers(e *echo.Echo) <span class="cov0" title="0">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file10" style="display: none">package locations
+		<pre class="file" id="file12" style="display: none">package locations
 
 import (
         "net/http"
@@ -541,7 +614,7 @@ func (h *Handler) DeleteStockLocation(ctx echo.Context, stockLocationId openapi_
 }
 </pre>
 		
-		<pre class="file" id="file11" style="display: none">package locations
+		<pre class="file" id="file13" style="display: none">package locations
 
 import (
         "database/sql"
@@ -573,7 +646,7 @@ func RegisterHandlers(e *echo.Echo, db *sql.DB) error <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file12" style="display: none">package locations
+		<pre class="file" id="file14" style="display: none">package locations
 
 import (
         "net/http"
@@ -621,7 +694,7 @@ func (h *Handler) PostStockLocation(ctx echo.Context) error <span class="cov8" t
 }
 </pre>
 		
-		<pre class="file" id="file13" style="display: none">package locations
+		<pre class="file" id="file15" style="display: none">package locations
 
 import (
         "net/http"
