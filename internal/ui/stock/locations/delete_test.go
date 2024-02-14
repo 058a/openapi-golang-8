@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	_ "github.com/lib/pq"
 
 	"github.com/google/uuid"
 
