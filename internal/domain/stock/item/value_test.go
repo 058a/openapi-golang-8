@@ -6,6 +6,8 @@ import (
 )
 
 func TestNewName(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		v string
 	}
@@ -15,8 +17,8 @@ func TestNewName(t *testing.T) {
 		want    Name
 		wantErr bool
 	}{
-		{"test", args{"test"}, Name{"test"}, false},
-		{"", args{""}, Name{}, true},
+		{"success", args{"test"}, Name{"test"}, false},
+		{"errored", args{""}, Name{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -33,6 +35,8 @@ func TestNewName(t *testing.T) {
 }
 
 func TestName_String(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		string string
 	}

@@ -8,6 +8,8 @@ import (
 )
 
 func TestNewId(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		v uuid.UUID
 	}
@@ -37,6 +39,8 @@ func TestNewId(t *testing.T) {
 }
 
 func TestId_UUID(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		value uuid.UUID
 	}
@@ -62,6 +66,8 @@ func TestId_UUID(t *testing.T) {
 }
 
 func TestId_String(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		value uuid.UUID
 	}

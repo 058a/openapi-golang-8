@@ -63,29 +63,31 @@
 				
 				<option value="file3">openapi/internal/app/stock/location/update.go (100.0%)</option>
 				
-				<option value="file4">openapi/internal/domain/stock/item/entity.go (100.0%)</option>
+				<option value="file4">openapi/internal/domain/stock/item/aggregate.go (100.0%)</option>
 				
-				<option value="file5">openapi/internal/domain/stock/item/value.go (100.0%)</option>
+				<option value="file5">openapi/internal/domain/stock/item/entity.go (100.0%)</option>
 				
-				<option value="file6">openapi/internal/domain/stock/location/aggregate.go (100.0%)</option>
+				<option value="file6">openapi/internal/domain/stock/item/value.go (100.0%)</option>
 				
-				<option value="file7">openapi/internal/domain/stock/location/entity.go (100.0%)</option>
+				<option value="file7">openapi/internal/domain/stock/location/aggregate.go (100.0%)</option>
 				
-				<option value="file8">openapi/internal/domain/stock/location/value.go (100.0%)</option>
+				<option value="file8">openapi/internal/domain/stock/location/entity.go (100.0%)</option>
 				
-				<option value="file9">openapi/internal/infra/repository/sqlboiler/stock/location/repository.go (100.0%)</option>
+				<option value="file9">openapi/internal/domain/stock/location/value.go (100.0%)</option>
 				
-				<option value="file10">openapi/internal/ui/hello/get.go (0.0%)</option>
+				<option value="file10">openapi/internal/infra/repository/sqlboiler/stock/location/repository.go (100.0%)</option>
 				
-				<option value="file11">openapi/internal/ui/hello/hello.go (0.0%)</option>
+				<option value="file11">openapi/internal/ui/hello/get.go (0.0%)</option>
 				
-				<option value="file12">openapi/internal/ui/stock/locations/delete.go (72.7%)</option>
+				<option value="file12">openapi/internal/ui/hello/hello.go (0.0%)</option>
 				
-				<option value="file13">openapi/internal/ui/stock/locations/locations.go (100.0%)</option>
+				<option value="file13">openapi/internal/ui/stock/locations/delete.go (72.7%)</option>
 				
-				<option value="file14">openapi/internal/ui/stock/locations/post.go (75.0%)</option>
+				<option value="file14">openapi/internal/ui/stock/locations/locations.go (100.0%)</option>
 				
-				<option value="file15">openapi/internal/ui/stock/locations/put.go (76.5%)</option>
+				<option value="file15">openapi/internal/ui/stock/locations/post.go (75.0%)</option>
+				
+				<option value="file16">openapi/internal/ui/stock/locations/put.go (76.5%)</option>
 				
 				</select>
 			</div>
@@ -280,6 +282,41 @@ func Update(req updateRequest, r location.IRepository) error <span class="cov8" 
 		
 		<pre class="file" id="file4" style="display: none">package item
 
+type (
+        Aggregate struct {
+                Id      Id
+                Name    Name
+                deleted bool
+        }
+)
+
+func NewAggregate(id Id, name Name) *Aggregate <span class="cov8" title="1">{
+        return &amp;Aggregate{
+                Id:      id,
+                Name:    name,
+                deleted: false,
+        }
+}</span>
+
+func RestoreAggregate(id Id, name Name, deleted bool) *Aggregate <span class="cov8" title="1">{
+        return &amp;Aggregate{
+                Id:      id,
+                Name:    name,
+                deleted: deleted,
+        }
+}</span>
+
+func (a Aggregate) IsDeleted() bool <span class="cov8" title="1">{
+        return a.deleted
+}</span>
+
+func (a *Aggregate) Delete() <span class="cov8" title="1">{
+        a.deleted = true
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package item
+
 import (
         "errors"
 
@@ -312,7 +349,7 @@ func (v Id) String() string <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package item
+		<pre class="file" id="file6" style="display: none">package item
 
 import (
         "errors"
@@ -347,28 +384,28 @@ func (v Name) String() string <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package location
+		<pre class="file" id="file7" style="display: none">package location
 
-type(
+type (
         Aggregate struct {
-                Id                   Id
-                Name                 Name
+                Id      Id
+                Name    Name
                 deleted bool
         }
 )
 
 func NewAggregate(id Id, name Name) *Aggregate <span class="cov8" title="1">{
         return &amp;Aggregate{
-                Id:   id,
-                Name: name,
+                Id:      id,
+                Name:    name,
                 deleted: false,
         }
 }</span>
 
 func RestoreAggregate(id Id, name Name, deleted bool) *Aggregate <span class="cov8" title="1">{
         return &amp;Aggregate{
-                Id:   id,
-                Name: name,
+                Id:      id,
+                Name:    name,
                 deleted: deleted,
         }
 }</span>
@@ -379,9 +416,10 @@ func (a Aggregate) IsDeleted() bool <span class="cov8" title="1">{
 
 func (a *Aggregate) Delete() <span class="cov8" title="1">{
         a.deleted = true
-}</pre>
+}</span>
+</pre>
 		
-		<pre class="file" id="file7" style="display: none">package location
+		<pre class="file" id="file8" style="display: none">package location
 
 import (
         "github.com/friendsofgo/errors"
@@ -413,7 +451,7 @@ func (v Id) String() string <span class="cov8" title="1">{
         return v.value.String()
 }</pre>
 		
-		<pre class="file" id="file8" style="display: none">package location
+		<pre class="file" id="file9" style="display: none">package location
 
 import (
         "errors"
@@ -440,7 +478,7 @@ func (v Name) String() string <span class="cov8" title="1">{
         return v.string
 }</pre>
 		
-		<pre class="file" id="file9" style="display: none">package location
+		<pre class="file" id="file10" style="display: none">package location
 
 import (
         "context"
@@ -539,7 +577,7 @@ func (r *Repository) Find(id location.Id) (bool, error) <span class="cov8" title
 }
 </pre>
 		
-		<pre class="file" id="file10" style="display: none">package hello
+		<pre class="file" id="file11" style="display: none">package hello
 
 import (
         "net/http"
@@ -559,7 +597,7 @@ func (h *Handler) GetHello(ctx echo.Context) error <span class="cov0" title="0">
 }</span>
 </pre>
 		
-		<pre class="file" id="file11" style="display: none">package hello
+		<pre class="file" id="file12" style="display: none">package hello
 
 import (
         oapicodegen "openapi/internal/infra/oapicodegen/hello"
@@ -576,7 +614,7 @@ func RegisterHandlers(e *echo.Echo) <span class="cov0" title="0">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file12" style="display: none">package locations
+		<pre class="file" id="file13" style="display: none">package locations
 
 import (
         "net/http"
@@ -614,7 +652,7 @@ func (h *Handler) DeleteStockLocation(ctx echo.Context, stockLocationId openapi_
 }
 </pre>
 		
-		<pre class="file" id="file13" style="display: none">package locations
+		<pre class="file" id="file14" style="display: none">package locations
 
 import (
         "database/sql"
@@ -646,7 +684,7 @@ func RegisterHandlers(e *echo.Echo, db *sql.DB) error <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file14" style="display: none">package locations
+		<pre class="file" id="file15" style="display: none">package locations
 
 import (
         "net/http"
@@ -694,7 +732,7 @@ func (h *Handler) PostStockLocation(ctx echo.Context) error <span class="cov8" t
 }
 </pre>
 		
-		<pre class="file" id="file15" style="display: none">package locations
+		<pre class="file" id="file16" style="display: none">package locations
 
 import (
         "net/http"
